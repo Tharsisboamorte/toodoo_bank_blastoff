@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -9,14 +10,17 @@ import 'package:toodoo_bank/network/models/billet_payment_entity.dart';
 
 import 'models/barcode_model.dart';
 
-const request = "https://qa-internal-api.tfes.tech/transfer";
+const request = "https://qa-internal-api.tfes.tech/";
 
 class CallApi{
-  Map<dynamic, String> headers = {
-    HttpHeaders.contentTypeHeader: 'application/json',
-    HttpHeaders.acceptHeader: 'application/json',
-    HttpHeaders.authorizationHeader: 'Token bff0e7675d6d80bd692f1be811da63e4182e4a5f'
-  };
+  Future<String?> getTokenPref() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    if (token != null) {
+      return token;
+    }
+    return null;
+  }
 
   final dio = Dio(
     BaseOptions(
@@ -28,15 +32,57 @@ class CallApi{
 
 
   Future<BarcodeModelEntity> getValidBarCode(String barcode) async{
-    Response response = await dio.get("/v1/validate/{$barcode}");
-    return json.decode(response.data);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? authToken = prefs.getString('token');
+    debugPrint("Token :  $authToken");
+    Response response = await dio.get("transfer/v1/validate/$barcode",
+        options: Options(
+            headers: {
+              "Authorization" : "Bearer $authToken"
+            }
+        ));
+    if (response.statusCode == 200) {
+      return BarcodeModelEntity.fromJson(response.data);
+    } else {
+      debugPrint("error : ${response.statusMessage}");
+      throw Exception('Failed to get valid barcode');
+    }
   }
 
   void postPayment(BilletPaymentEntity billetPayment) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? authToken = prefs.getString('token');
     try {
-      await dio.post("/v1/billetPayment", data: billetPayment.toJson());
+      await dio.post("transfer/v1/billetPayment", data: billetPayment.toJson(), options: Options(
+        headers: {"Authorization": "Bearer $authToken"}));
     } on DioError catch (error) {
       debugPrint("Error when posting: ${error.response?.statusCode}");
+    }
+  }
+
+  Future<void> getToken() async {
+    final response = await dio.post(
+      'https://qa-api.tfes.tech/account/v1/auth/token',
+      options: Options(
+        headers: {
+          'Accept-Language': 'en_US',
+          'Ocp-Apim-Subscription-Key': '31e412230884479bb6252284d4020f8a',
+          'Content-Type': 'application/json',
+        },
+      ),
+      data: jsonEncode({
+        'username': '00000002135',
+        'password': 'Abelha@123',
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = response.data;
+      await prefs.setString('token', token.toString());
+      return token;
+    } else {
+      debugPrint('Failed to get token: ${response.statusCode}');
     }
   }
 

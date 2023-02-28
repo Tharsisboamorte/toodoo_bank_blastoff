@@ -28,7 +28,6 @@ class _BarCodeReadState extends State<BarCodeRead> {
   void initState() {
     super.initState();
     _scannerWidgetController = BarcodeScannerWidgetController(() {
-
       const ScannerConfiguration(enableFormats: {
         BarcodeFormat.code128,
         BarcodeFormat.code39,
@@ -65,6 +64,8 @@ class _BarCodeReadState extends State<BarCodeRead> {
 
   @override
   Widget build(BuildContext context) {
+    final arguments = (ModalRoute.of(context)?.settings.arguments ??
+        <String, dynamic>{"Token": ""}) as Map<String, dynamic>;
     _isTorchAvailable(context);
     double height = MediaQuery
         .of(context)
@@ -166,6 +167,7 @@ class _BarCodeReadState extends State<BarCodeRead> {
                           BarcodeScannerWidget(
                               onScan: (barcode) {
                                 debugPrint(barcode.code);
+                                debugPrint(arguments["Token"]);
                                 CallApi().getValidBarCode(barcode.code).then(
                                         (barcodeData) => Navigator.of(context).pushNamed(
                                         "/paymentTicket",

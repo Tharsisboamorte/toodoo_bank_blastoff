@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart' show debugPrint;
 import 'package:toodoo_bank/network/models/barcode_model.dart';
 import 'package:toodoo_bank/network/models/billet_payment_entity.dart';
+import 'package:toodoo_bank/network/models/user_model_entity.dart';
 
 JsonConvert jsonConvert = JsonConvert();
 typedef JsonConvertFunction<T> = T Function(Map<String, dynamic> json);
@@ -14,6 +15,7 @@ class JsonConvert {
 	static final Map<String, JsonConvertFunction> _convertFuncMap = {
 		(BarcodeModelEntity).toString(): BarcodeModelEntity.fromJson,
 		(BilletPaymentEntity).toString(): BilletPaymentEntity.fromJson,
+		(UserModelEntity).toString(): UserModelEntity.fromJson,
 	};
 
   T? convert<T>(dynamic value) {
@@ -97,6 +99,9 @@ class JsonConvert {
 		}
 		if(<BilletPaymentEntity>[] is M){
 			return data.map<BilletPaymentEntity>((Map<String, dynamic> e) => BilletPaymentEntity.fromJson(e)).toList() as M;
+		}
+		if(<UserModelEntity>[] is M){
+			return data.map<UserModelEntity>((Map<String, dynamic> e) => UserModelEntity.fromJson(e)).toList() as M;
 		}
 
 		debugPrint("${M.toString()} not found");

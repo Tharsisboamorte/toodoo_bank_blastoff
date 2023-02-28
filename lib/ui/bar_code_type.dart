@@ -19,6 +19,11 @@ class _BarCodeTypeState extends State<BarCodeType> {
   final _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void dispose() {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
@@ -31,8 +36,15 @@ class _BarCodeTypeState extends State<BarCodeType> {
 
   @override
   Widget build(BuildContext context) {
+    final arguments = (ModalRoute
+        .of(context)
+        ?.settings
+        .arguments ??
+        <String, dynamic>{"Token": ""}) as Map<String, dynamic>;
     TextEditingController textController = TextEditingController();
-    Size screenSize = MediaQuery.of(context).size;
+    Size screenSize = MediaQuery
+        .of(context)
+        .size;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -48,7 +60,7 @@ class _BarCodeTypeState extends State<BarCodeType> {
               Navigator.of(context).pushNamed("/barCodeChoice");
             },
             icon:
-                Icon(Icons.arrow_back_ios_new, color: CustomColors.blackText)),
+            Icon(Icons.arrow_back_ios_new, color: CustomColors.blackText)),
       ),
       body: Padding(
         padding: const EdgeInsets.only(
@@ -71,7 +83,7 @@ class _BarCodeTypeState extends State<BarCodeType> {
                 padding: const EdgeInsets.only(bottom: 4.0),
                 child: Text("Código de barras",
                     style:
-                        TextStyle(color: CustomColors.blackText, fontSize: 14)),
+                    TextStyle(color: CustomColors.blackText, fontSize: 14)),
               ),
               Form(
                 key: _formKey,
@@ -79,26 +91,27 @@ class _BarCodeTypeState extends State<BarCodeType> {
                   maxLength: 60,
                   maxLines: 2,
                   decoration: InputDecoration(
-                    errorStyle: TextStyle(color: CustomColors.redAlert),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: CustomColors.redAlert)
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: CustomColors.redAlert)
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: CustomColors.neutral700)
-                    )
+                      errorStyle: TextStyle(color: CustomColors.redAlert),
+                      focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: CustomColors.redAlert)
+                      ),
+                      errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: CustomColors.redAlert)
+                      ),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: CustomColors.neutral700)
+                      )
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'O código informado é inválido.';
                     }
-                    if (!BarCode().validator(value)) {
-                      return  'O código informado é inválido.';
+                    if (!BarCode().validator(
+                        value.replaceAll(RegExp('[. ]'), ""))) {
+                      return 'O código informado é inválido.';
                     }
                     return null;
                   },
@@ -141,12 +154,12 @@ class _BarCodeTypeState extends State<BarCodeType> {
                                       side: BorderSide(
                                           color: CustomColors.blue300)))),
                           onPressed: () async {
-                            String text = textController.text;
+                            String text = textController.text.replaceAll(
+                                RegExp('[. ]'), "");
                             BarcodeModelEntity barcodeModel = BarcodeModelEntity();
-                            debugPrint(text);
-                            CallApi().getValidBarCode(text).then((value) => {
-                              barcodeModel = value
-                            });
+                            debugPrint(" Text: $text");
+
+                            debugPrint("Token: ${arguments["Token"]}");
                             if (_formKey.currentState!.validate()) {
                               // Navigator.of(context).pushNamed("/paymentTicket", arguments: {
                               //   "barcode" : barcodeModel.barcode,
@@ -159,8 +172,8 @@ class _BarCodeTypeState extends State<BarCodeType> {
                               //   "interest" : barcodeModel.interest,
                               //   "totalAmountDue" : barcodeModel.totalAmountDue,
                               // });
-                              Navigator.of(context).pushNamed("/paymentTicket");
                             }
+                            Navigator.of(context).pushNamed("/paymentTicket");
                           },
                           child: const Text("Confirmar",
                               style: TextStyle(

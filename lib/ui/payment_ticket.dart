@@ -31,6 +31,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
   @override
   Widget build(BuildContext context) {
+
     Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
