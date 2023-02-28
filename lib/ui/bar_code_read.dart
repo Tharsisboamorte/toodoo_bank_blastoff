@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:combined_barcode_scanner/combined_barcode_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:toodoo_bank/network/payment_network.dart';
 import 'package:toodoo_bank/utils/utils.dart';
 import 'package:torch_light/torch_light.dart';
@@ -191,7 +192,7 @@ class _BarCodeReadState extends State<BarCodeRead> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8.0),
-                            child: Image.asset("assets/icons/flashIcon.png"),
+                            child: SvgPicture.asset("assets/icons/flashIcon.svg"),
                           ),
                           const Text(
                             "Ligar flash",
@@ -216,8 +217,8 @@ class _BarCodeReadState extends State<BarCodeRead> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(right: 8.0),
-                              child: Image.asset(
-                                  "assets/icons/whiteNumberedKey.png"),
+                              child: SvgPicture.asset(
+                                  "assets/icons/whiteKeyboardIcon.svg"),
                             ),
                             const Text(
                               "Digitar código de barras",

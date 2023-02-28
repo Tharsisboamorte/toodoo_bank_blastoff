@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:toodoo_bank/network/models/barcode_model.dart';
 import 'package:toodoo_bank/network/payment_network.dart';
 import 'package:toodoo_bank/utils/utils.dart';
 
@@ -141,9 +142,23 @@ class _BarCodeTypeState extends State<BarCodeType> {
                                           color: CustomColors.blue300)))),
                           onPressed: () async {
                             String text = textController.text;
+                            BarcodeModelEntity barcodeModel = BarcodeModelEntity();
                             debugPrint(text);
-                            CallApi().getValidBarCode(text);
+                            CallApi().getValidBarCode(text).then((value) => {
+                              barcodeModel = value
+                            });
                             if (_formKey.currentState!.validate()) {
+                              // Navigator.of(context).pushNamed("/paymentTicket", arguments: {
+                              //   "barcode" : barcodeModel.barcode,
+                              //   "paymentType" : barcodeModel.paymentType,
+                              //   "dueDate" : barcodeModel.dueDate,
+                              //   "paymentLimitDate" : barcodeModel.paymentLimitDate,
+                              //   "value" : barcodeModel.value,
+                              //   "recipient" : barcodeModel.recipient,
+                              //   "discount" : barcodeModel.discount,
+                              //   "interest" : barcodeModel.interest,
+                              //   "totalAmountDue" : barcodeModel.totalAmountDue,
+                              // });
                               Navigator.of(context).pushNamed("/paymentTicket");
                             }
                           },

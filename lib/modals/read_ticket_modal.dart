@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:toodoo_bank/utils/utils.dart';
 
 class ReadTicketModal extends StatelessWidget {
@@ -20,7 +21,7 @@ class ReadTicketModal extends StatelessWidget {
                 decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: CustomColors.dividerModal),
                 width: 48,
                 height: 5,
-                child: Divider(
+                child: const Divider(
                   color: Colors.transparent,
                 ),
               ),
@@ -39,7 +40,7 @@ class ReadTicketModal extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Image.asset("assets/icons/barCode.png"),
+                    SvgPicture.asset("assets/icons/barcodeIcon.svg"),
                     Text("Escanear código de barras", style: TextStyle(color: CustomColors.blackText, fontSize: 16, fontFamily: Fonts.defaultText, fontWeight: FontWeight.bold)),
                     Icon(Icons.arrow_forward_ios_outlined, color: CustomColors.blue300,)
                   ],
@@ -59,7 +60,7 @@ class ReadTicketModal extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Image.asset("assets/icons/numberedKeyboard.png"),
+                    SvgPicture.asset("assets/icons/numberedKeyboard.svg"),
                     Text("Digitar código de barras", style: TextStyle(color: CustomColors.blackText, fontSize: 16, fontFamily: Fonts.defaultText, fontWeight: FontWeight.bold)),
                     Icon(Icons.arrow_forward_ios_outlined, color: CustomColors.blue300,)
                   ],

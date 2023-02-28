@@ -36,6 +36,7 @@ dependencies:
   intl: ^0.18.0
   combined_barcode_scanner: ^0.0.1-dev.1
   torch_light: ^1.0.0
+  flutter_svg: any
   camera: ^0.10.3+1
 
 
@@ -65,11 +66,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - "assets/icons/barCode.png"
-    - "assets/icons/numberedKeyboard.png"
-    - "assets/icons/whiteNumberedKey.png"
-    - "assets/icons/flashIcon.png"
-    - "assets/icons/calenderIcon.png"
+    - "assets/icons/barcodeIcon.svg"
+    - "assets/icons/numberedKeyboard.svg"
+    - "assets/icons/whiteKeyboardIcon.svg"
+    - "assets/icons/flashIcon.svg"
+    - "assets/icons/calenderIcon.svg"
     - "assets/images/dialogBoard.png"
     - "assets/images/warning.png"
 

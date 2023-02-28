@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:toodoo_bank/components/text_field.dart';
 import 'package:toodoo_bank/modals/payment_error.dart';
+import 'package:toodoo_bank/network/models/barcode_model.dart';
 
 import '../components/info_card.dart';
 import '../utils/utils.dart';
@@ -17,7 +19,8 @@ class PaymentPage extends StatefulWidget {
 class _PaymentPageState extends State<PaymentPage> {
   bool isObscured = true;
   TextEditingController controller = TextEditingController();
-  final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
+  String formattedDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
+  int _selectedValue = 0;
 
 
   @override
@@ -99,27 +102,27 @@ class _PaymentPageState extends State<PaymentPage> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
-                const Padding(
+                 Padding(
                   padding: EdgeInsets.only(bottom: 16.0),
-                  child: InfoCard(category: "Valor", info: "R\$ 150,00"),
+                  child: InfoCard(category: "Valor", info:"R\$ 150,00"),
                 ),
-                const Padding(
+                 Padding(
                   padding: EdgeInsets.only(bottom: 16.0),
                   child: InfoCard(
                       category: "Data de vencimento", info: "12/12/2022"),
                 ),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(bottom: 16.0),
                   child: InfoCard(
                       category: "Beneficiário",
                       info: "COPASA Cia. de Tratamento de Água..."),
                 ),
-                const Padding(
+                 Padding(
                   padding: EdgeInsets.only(bottom: 24.0),
                   child: InfoCard(
                       category: "Código de barras",
                       info:
-                          "84670000001-7 43590024020-9 02405000243-5 84221010811-9",
+                      "84670000001-7 43590024020-9 02405000243-5 84221010811-9",
                       textOverflow: TextOverflow.visible,
                       maxLine: 2),
                 ),
@@ -135,13 +138,15 @@ class _PaymentPageState extends State<PaymentPage> {
                   title: Text("Pagar agora"),
                   leading: Radio(
                       activeColor: CustomColors.blue300,
-                      value: "Pagar agora",
-                      groupValue: "Date",
+                      value: 0,
+                      groupValue: _selectedValue,
                       onChanged: (value) {
-                        setState(() {});
+                        setState(() {
+                          _selectedValue = value as int;
+                        });
                       }),
                   trailing: Text(
-                    DateFormat.yMd().format(DateTime.now()),
+                    formattedDate,
                     style: TextStyle(
                         color: CustomColors.blue300,
                         fontWeight: FontWeight.bold),
@@ -152,15 +157,15 @@ class _PaymentPageState extends State<PaymentPage> {
                     title: Text("Agendar"),
                     leading: Radio(
                         activeColor: CustomColors.blue300,
-                        value: "Agendar",
-                        groupValue: "Date",
+                        value: 1,
+                        groupValue: _selectedValue,
                         onChanged: (value) {
-                          setState(() {});
+                          setState(() {
+                            _selectedValue = value as int;
+                          });
                         }),
-                    trailing: Icon(
-                      Icons.calendar_month,
-                      color: CustomColors.blue300,
-                    )),
+                    trailing: SvgPicture.asset("assets/icons/calenderIcon.svg"),
+                ),
                 Divider(color: CustomColors.neutral700, thickness: 1),
                 const Padding(
                   padding: EdgeInsets.only(top: 14.0, bottom: 4.0),
