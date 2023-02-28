@@ -17,12 +17,18 @@ class PaymentPage extends StatefulWidget {
 class _PaymentPageState extends State<PaymentPage> {
   bool isObscured = true;
   TextEditingController controller = TextEditingController();
+  final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
 
+
+  @override
+  void initState() {
+    super.initState();
+    initializeDateFormatting('pt_BR', null);
+  }
 
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
-    initializeDateFormatting('pt_BR', null);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -162,7 +168,33 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 40.0),
-                  child: CustomInputTextField(controller: controller  ),
+                  child: TextField(
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText: "Digite aqui",
+                      filled: true,
+                      hintStyle: TextStyle(color: CustomColors.hintGrey, fontFamily: Fonts.inputText),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                              color: CustomColors.neutral700,
+                              strokeAlign: StrokeAlign.outside)),
+                      fillColor: CustomColors.neutral700,
+                      focusedErrorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: CustomColors.redAlert)
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                              color: CustomColors.neutral700,
+                              strokeAlign: StrokeAlign.outside)),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                              color: CustomColors.neutral700,
+                              strokeAlign: StrokeAlign.outside)),
+                    ),
+                  ),
                 ),
                 Center(
                   child: SizedBox(

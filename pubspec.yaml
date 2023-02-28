@@ -34,7 +34,8 @@ dependencies:
   google_fonts: ^4.0.3
   dio: ^5.0.0
   intl: ^0.18.0
-  mobile_scanner: ^3.0.0
+  combined_barcode_scanner: ^0.0.1-dev.1
+  torch_light: ^1.0.0
   camera: ^0.10.3+1
 
 

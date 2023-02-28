@@ -1,10 +1,10 @@
-
 import 'package:camera/camera.dart';
+import 'package:combined_barcode_scanner/combined_barcode_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:toodoo_bank/modals/read_error.dart';
+import 'package:toodoo_bank/network/payment_network.dart';
 import 'package:toodoo_bank/utils/utils.dart';
+import 'package:torch_light/torch_light.dart';
 
 class BarCodeRead extends StatefulWidget {
   const BarCodeRead({Key? key}) : super(key: key);
@@ -15,11 +15,26 @@ class BarCodeRead extends StatefulWidget {
 
 class _BarCodeReadState extends State<BarCodeRead> {
   late CameraController _controller;
+  late BarcodeScannerWidgetController _scannerWidgetController;
+
   late Future<void> _initializeControllerFuture;
+
+  bool isTorchEnabled = false;
+
+  List<BarcodeScanner> scanners = [];
 
   @override
   void initState() {
     super.initState();
+    _scannerWidgetController = BarcodeScannerWidgetController(() {
+
+      const ScannerConfiguration(enableFormats: {
+        BarcodeFormat.code128,
+        BarcodeFormat.code39,
+        BarcodeFormat.code93,
+        BarcodeFormat.codabar,
+      });
+    });
     _controller = CameraController(
         const CameraDescription(
           name: '0',
@@ -36,6 +51,7 @@ class _BarCodeReadState extends State<BarCodeRead> {
 
   @override
   void dispose() {
+    _scannerWidgetController.dispose();
     _controller.dispose();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
@@ -48,8 +64,15 @@ class _BarCodeReadState extends State<BarCodeRead> {
 
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
+    _isTorchAvailable(context);
+    double height = MediaQuery
+        .of(context)
+        .size
+        .height;
+    double width = MediaQuery
+        .of(context)
+        .size
+        .width;
     return Scaffold(
       body: Container(
         color: CustomColors.blackText,
@@ -96,14 +119,14 @@ class _BarCodeReadState extends State<BarCodeRead> {
                                   ),
                                   text: "Posicione o ",
                                   children: [
-                                TextSpan(
-                                    text: "código de barras ",
-                                    style:
+                                    TextSpan(
+                                        text: "código de barras ",
+                                        style:
                                         TextStyle(fontWeight: FontWeight.bold)),
-                                TextSpan(
-                                  text: "na área indicada.",
-                                ),
-                              ])),
+                                    TextSpan(
+                                      text: "na área indicada.",
+                                    ),
+                                  ])),
                         ),
                       ],
                     ),
@@ -124,9 +147,31 @@ class _BarCodeReadState extends State<BarCodeRead> {
                   if (snapshot.connectionState == ConnectionState.done) {
                     return CameraPreview(
                       _controller,
+                      child:BarcodeScannerWidget(
+                          onScan: (barcode) {
+                            debugPrint(barcode.code);
+                            CallApi().getValidBarCode(barcode.code).then(
+                                    (barcodeData) => Navigator.of(context).pushNamed(
+                                    "/paymentTicket",
+                                    arguments: {"barcode": barcodeData}));
+                          },
+                          configuration: const ScannerConfiguration(
+                              cameraConfiguration: CameraConfiguration(
+                                  resolution: CameraResolution.medium,
+                                  frameRate: 60,
+                                  mode: BarcodeDetectionMode.pauseDetection,
+                                  type: CameraType.back),
+                              enableFormats: {
+                                BarcodeFormat.code128,
+                                BarcodeFormat.code39,
+                                BarcodeFormat.code93,
+                                BarcodeFormat.codabar,
+                              }),
+                          scanners: [],
+                          controller: _scannerWidgetController),
                     );
                   } else {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
                 },
               ),
@@ -137,7 +182,10 @@ class _BarCodeReadState extends State<BarCodeRead> {
                 children: [
                   InkWell(
                       onTap: () {
-                        _controller.setFlashMode(FlashMode.torch);
+                        setState(() {
+                          isTorchEnabled = !isTorchEnabled;
+                        });
+                        isTorchEnabled ? FlashLight().enableTorch() : FlashLight().disableTorch();
                       },
                       child: Row(
                         children: [
@@ -188,5 +236,13 @@ class _BarCodeReadState extends State<BarCodeRead> {
         ),
       ),
     );
+  }
+  Future<bool> _isTorchAvailable(BuildContext context) async {
+    try {
+      return await TorchLight.isTorchAvailable();
+    } on Exception catch (_) {
+      debugPrint('Could not check if the device has an available torch');
+      rethrow;
+    }
   }
 }

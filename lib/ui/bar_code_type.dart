@@ -15,7 +15,6 @@ class BarCodeType extends StatefulWidget {
 }
 
 class _BarCodeTypeState extends State<BarCodeType> {
-  TextEditingController controller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -31,7 +30,7 @@ class _BarCodeTypeState extends State<BarCodeType> {
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController textController = TextEditingController();
+    TextEditingController textController = TextEditingController();
     Size screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -73,40 +72,35 @@ class _BarCodeTypeState extends State<BarCodeType> {
                     style:
                         TextStyle(color: CustomColors.blackText, fontSize: 14)),
               ),
-              TextFormField(
-                controller: textController,
-                maxLines: 2,
-                validator: (text) {
-                  BarCode().validator(textController.text);
-                },
-                maxLength: 60,
-
-                decoration: InputDecoration(
-                  errorText: " O código informado é inválido.",
-                  errorBorder:OutlineInputBorder(borderSide: BorderSide(color: CustomColors.redAlert)) ,
-                  errorStyle: TextStyle(color: CustomColors.redAlert, fontFamily: Fonts.inputText, fontSize: 12),
-                  hintText: "Digite aqui",
-                  filled: true,
-                  hintStyle: TextStyle(color: CustomColors.hintGrey, fontFamily: Fonts.inputText),
-                  border: OutlineInputBorder(
+              Form(
+                key: _formKey,
+                child: TextFormField(
+                  maxLength: 60,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    errorStyle: TextStyle(color: CustomColors.redAlert),
+                    focusedErrorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                          color: CustomColors.neutral700,
-                          strokeAlign: StrokeAlign.outside)),
-                  fillColor: CustomColors.neutral700,
-                  focusedErrorBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: CustomColors.redAlert)
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: CustomColors.redAlert)
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: CustomColors.neutral700)
+                    )
                   ),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                          color: CustomColors.neutral700,
-                          strokeAlign: StrokeAlign.outside)),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                          color: CustomColors.neutral700,
-                          strokeAlign: StrokeAlign.outside)),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'O código informado é inválido.';
+                    }
+                    if (!BarCode().validator(value)) {
+                      return  'O código informado é inválido.';
+                    }
+                    return null;
+                  },
                 ),
               ),
               const Spacer(flex: 2),
@@ -147,8 +141,8 @@ class _BarCodeTypeState extends State<BarCodeType> {
                                           color: CustomColors.blue300)))),
                           onPressed: () async {
                             String text = textController.text;
+                            debugPrint(text);
                             CallApi().getValidBarCode(text);
-                            developer.log(text, name: "BARCODE_LOG");
                             if (_formKey.currentState!.validate()) {
                               Navigator.of(context).pushNamed("/paymentTicket");
                             }

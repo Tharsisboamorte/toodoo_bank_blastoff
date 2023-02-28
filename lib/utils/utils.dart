@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:toodoo_bank/network/payment_network.dart';
+import 'package:torch_light/torch_light.dart';
 
 //Colors
 class CustomColors{
@@ -17,10 +19,6 @@ class CustomColors{
   static Color blackText = const Color(0xFF25242E);
 
 
-}
-
-class CustomIcons{
-  Icon errorAlert = Icon(Icons.error_outlined, color: CustomColors.redAlert);
 }
 
 //Fonts
@@ -46,12 +44,31 @@ extension RouterContextExtension on BuildContext {
   }
 }
 
+//Flashlight
+class FlashLight{
+  Future<void> enableTorch() async {
+    try {
+      await TorchLight.enableTorch();
+    } catch (e) {
+      debugPrint('Could not enable torch $e');
+    }
+  }
+
+  Future<void> disableTorch() async {
+    try {
+      await TorchLight.disableTorch();
+    }catch (e) {
+      debugPrint('Could not disable torch $e');
+    }
+  }
+
+}
+
 class BarCode{
 
-
   bool validator(String text){
-    RegExp regexBarCode = RegExp(r'^\d{13}$');
-    return text.isNotEmpty && regexBarCode.hasMatch(text);
+    final response = CallApi().getValidBarCode(text);
+    return text.isNotEmpty ;
   }
 }
 

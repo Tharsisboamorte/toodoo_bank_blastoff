@@ -7,6 +7,8 @@ import 'dart:convert';
 
 import 'package:toodoo_bank/network/models/billet_payment_entity.dart';
 
+import 'models/barcode_model.dart';
+
 const request = "https://qa-internal-api.tfes.tech/transfer";
 
 class CallApi{
@@ -19,10 +21,13 @@ class CallApi{
   final dio = Dio(
     BaseOptions(
       baseUrl: request,
+      connectTimeout: const Duration(milliseconds: 5000),
+
     ),
   )..interceptors.add(networkService());
 
-  Future<Map> getValidBarCode(String barcode) async{
+
+  Future<BarcodeModelEntity> getValidBarCode(String barcode) async{
     Response response = await dio.get("/v1/validate/{$barcode}");
     return json.decode(response.data);
   }
