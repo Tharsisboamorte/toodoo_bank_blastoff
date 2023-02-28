@@ -148,28 +148,45 @@ class _BarCodeReadState extends State<BarCodeRead> {
                   if (snapshot.connectionState == ConnectionState.done) {
                     return CameraPreview(
                       _controller,
-                      child:BarcodeScannerWidget(
-                          onScan: (barcode) {
-                            debugPrint(barcode.code);
-                            CallApi().getValidBarCode(barcode.code).then(
-                                    (barcodeData) => Navigator.of(context).pushNamed(
-                                    "/paymentTicket",
-                                    arguments: {"barcode": barcodeData}));
-                          },
-                          configuration: const ScannerConfiguration(
-                              cameraConfiguration: CameraConfiguration(
-                                  resolution: CameraResolution.medium,
-                                  frameRate: 60,
-                                  mode: BarcodeDetectionMode.pauseDetection,
-                                  type: CameraType.back),
-                              enableFormats: {
-                                BarcodeFormat.code128,
-                                BarcodeFormat.code39,
-                                BarcodeFormat.code93,
-                                BarcodeFormat.codabar,
-                              }),
-                          scanners: [],
-                          controller: _scannerWidgetController),
+                      child:Stack(
+                        children: [
+                          Positioned(
+                            right: 0,
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 45.0, right: 46.0),
+                              child: Divider(
+                              color: CustomColors.blue300,
+                              thickness: 5,
+                              ),
+                            )
+                          ),
+                          BarcodeScannerWidget(
+                              onScan: (barcode) {
+                                debugPrint(barcode.code);
+                                CallApi().getValidBarCode(barcode.code).then(
+                                        (barcodeData) => Navigator.of(context).pushNamed(
+                                        "/paymentTicket",
+                                        arguments: {"barcode": barcodeData}));
+                              },
+                              configuration: const ScannerConfiguration(
+                                  cameraConfiguration: CameraConfiguration(
+                                      resolution: CameraResolution.medium,
+                                      frameRate: 60,
+                                      mode: BarcodeDetectionMode.pauseDetection,
+                                      type: CameraType.back),
+                                  enableFormats: {
+                                    BarcodeFormat.code128,
+                                    BarcodeFormat.code39,
+                                    BarcodeFormat.code93,
+                                    BarcodeFormat.codabar,
+                                  }),
+                              scanners: [],
+                              controller: _scannerWidgetController),
+                        ],
+                      )
                     );
                   } else {
                     return const Center(child: CircularProgressIndicator());
