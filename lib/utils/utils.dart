@@ -64,13 +64,4 @@ class FlashLight{
 
 }
 
-class BarCode{
-
-  bool validator(String text){
-    final response = CallApi().getValidBarCode(text);
-    return text.isNotEmpty ;
-  }
-}
-
-
 //Checking field

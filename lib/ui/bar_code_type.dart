@@ -1,12 +1,8 @@
-import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:toodoo_bank/network/models/barcode_model.dart';
 import 'package:toodoo_bank/network/payment_network.dart';
 import 'package:toodoo_bank/utils/utils.dart';
-
-import '../components/text_field.dart';
 
 class BarCodeType extends StatefulWidget {
   const BarCodeType({Key? key}) : super(key: key);
@@ -17,6 +13,7 @@ class BarCodeType extends StatefulWidget {
 
 class _BarCodeTypeState extends State<BarCodeType> {
   final _formKey = GlobalKey<FormState>();
+  final textController = TextEditingController();
 
   @override
   void initState() {
@@ -36,16 +33,9 @@ class _BarCodeTypeState extends State<BarCodeType> {
 
   @override
   Widget build(BuildContext context) {
-    final arguments = (ModalRoute
-        .of(context)
-        ?.settings
-        .arguments ??
+    final arguments = (ModalRoute.of(context)?.settings.arguments ??
         <String, dynamic>{"Token": ""}) as Map<String, dynamic>;
-    TextEditingController textController = TextEditingController();
-    Size screenSize = MediaQuery
-        .of(context)
-        .size;
-
+    Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -60,7 +50,7 @@ class _BarCodeTypeState extends State<BarCodeType> {
               Navigator.of(context).pushNamed("/barCodeChoice");
             },
             icon:
-            Icon(Icons.arrow_back_ios_new, color: CustomColors.blackText)),
+                Icon(Icons.arrow_back_ios_new, color: CustomColors.blackText)),
       ),
       body: Padding(
         padding: const EdgeInsets.only(
@@ -83,36 +73,31 @@ class _BarCodeTypeState extends State<BarCodeType> {
                 padding: const EdgeInsets.only(bottom: 4.0),
                 child: Text("Código de barras",
                     style:
-                    TextStyle(color: CustomColors.blackText, fontSize: 14)),
+                        TextStyle(color: CustomColors.blackText, fontSize: 14)),
               ),
               Form(
                 key: _formKey,
                 child: TextFormField(
                   maxLength: 60,
+                  controller: textController,
                   maxLines: 2,
                   decoration: InputDecoration(
                       errorStyle: TextStyle(color: CustomColors.redAlert),
                       focusedErrorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: CustomColors.redAlert)
-                      ),
+                          borderSide: BorderSide(color: CustomColors.redAlert)),
                       errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: CustomColors.redAlert)
-                      ),
+                          borderSide: BorderSide(color: CustomColors.redAlert)),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: CustomColors.neutral700)
-                      )
-                  ),
+                          borderSide:
+                              BorderSide(color: CustomColors.neutral700))),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'O código informado é inválido.';
                     }
-                    if (!BarCode().validator(
-                        value.replaceAll(RegExp('[. ]'), ""))) {
-                      return 'O código informado é inválido.';
-                    }
+                    CallApi().isValidBarCode(value.replaceAll(RegExp('[. ]'), ''));
                     return null;
                   },
                 ),
@@ -153,27 +138,15 @@ class _BarCodeTypeState extends State<BarCodeType> {
                                       borderRadius: BorderRadius.circular(8),
                                       side: BorderSide(
                                           color: CustomColors.blue300)))),
-                          onPressed: () async {
-                            String text = textController.text.replaceAll(
-                                RegExp('[. ]'), "");
-                            BarcodeModelEntity barcodeModel = BarcodeModelEntity();
+                          onPressed: () {
+                            String text = textController.text.replaceAll(RegExp('[. ]'), '');
                             debugPrint(" Text: $text");
-
-                            debugPrint("Token: ${arguments["Token"]}");
                             if (_formKey.currentState!.validate()) {
-                              // Navigator.of(context).pushNamed("/paymentTicket", arguments: {
-                              //   "barcode" : barcodeModel.barcode,
-                              //   "paymentType" : barcodeModel.paymentType,
-                              //   "dueDate" : barcodeModel.dueDate,
-                              //   "paymentLimitDate" : barcodeModel.paymentLimitDate,
-                              //   "value" : barcodeModel.value,
-                              //   "recipient" : barcodeModel.recipient,
-                              //   "discount" : barcodeModel.discount,
-                              //   "interest" : barcodeModel.interest,
-                              //   "totalAmountDue" : barcodeModel.totalAmountDue,
-                              // });
+                              Future<BarcodeModelEntity> barcodeModel =
+                                  CallApi().getValidBarCode(text);
+                              Navigator.of(context).pushNamed("/paymentTicket",
+                                  arguments:  barcodeModel);
                             }
-                            Navigator.of(context).pushNamed("/paymentTicket");
                           },
                           child: const Text("Confirmar",
                               style: TextStyle(

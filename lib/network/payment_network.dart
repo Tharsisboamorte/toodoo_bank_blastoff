@@ -1,18 +1,24 @@
-import 'dart:io';
-
+import 'dart:async';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:toodoo_bank/network/models/billet_payment_entity.dart';
+import 'package:toodoo_bank/network/models/token_model_entity.dart';
 
 import 'models/barcode_model.dart';
 
 const request = "https://qa-internal-api.tfes.tech/";
 
-class CallApi{
+class CallApi {
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: request,
+      connectTimeout: const Duration(milliseconds: 5000),
+    ),
+  )..interceptors.add(networkService());
+
+  //Shared prefs
   Future<String?> getTokenPref() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
@@ -22,25 +28,53 @@ class CallApi{
     return null;
   }
 
-  final dio = Dio(
-    BaseOptions(
-      baseUrl: request,
-      connectTimeout: const Duration(milliseconds: 5000),
+  //Validar o código de barras
+  Future<bool> isValidBarCode(String barcode) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final authToken = prefs.getString('token');
+      if (authToken == null) {
+        throw Exception('Failed to get auth token');
+      }
 
-    ),
-  )..interceptors.add(networkService());
+      final response = await dio.get(
+        "https://qa-api.tfes.tech/transfer/v1/validate/$barcode",
+        options: Options(
+          headers: {
+            'Accept-Language': 'pt-BR',
+            "Authorization": "Bearer $authToken",
+            'Ocp-Apim-Subscription-Key': '31e412230884479bb6252284d4020f8a',
+            'Content-Type': 'application/json'
+          },
+        ),
+      );
 
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        final errorMessage = response.data['message'] ?? response.statusMessage;
+        throw Exception('Failed to validate barcode: $errorMessage');
+      }
+    } catch (e) {
+      debugPrint('Error validating barcode: $e');
+      return false;
+    }
+  }
 
-  Future<BarcodeModelEntity> getValidBarCode(String barcode) async{
+  Future<BarcodeModelEntity> getValidBarCode(String barcode) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? authToken = prefs.getString('token');
     debugPrint("Token :  $authToken");
-    Response response = await dio.get("transfer/v1/validate/$barcode",
-        options: Options(
-            headers: {
-              "Authorization" : "Bearer $authToken"
-            }
-        ));
+    Response response =
+        await dio.get("https://qa-api.tfes.tech/transfer/v1/validate/$barcode",
+            options: Options(headers: {
+              'Accept-Language': 'pt-BR',
+              "Authorization": "Bearer $authToken",
+              'Ocp-Apim-Subscription-Key': '31e412230884479bb6252284d4020f8a',
+              'Content-Type': 'application/json'
+            }),
+        );
+
     if (response.statusCode == 200) {
       return BarcodeModelEntity.fromJson(response.data);
     } else {
@@ -49,18 +83,21 @@ class CallApi{
     }
   }
 
-  void postPayment(BilletPaymentEntity billetPayment) async{
+  //Realizar o pagamento
+  void postPayment(BilletPaymentEntity billetPayment) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? authToken = prefs.getString('token');
     try {
-      await dio.post("transfer/v1/billetPayment", data: billetPayment.toJson(), options: Options(
-        headers: {"Authorization": "Bearer $authToken"}));
+      await dio.post("https://qa-api.tfes.tech/transfer/v1/billetPayment",
+          data: billetPayment.toJson(),
+          options: Options(headers: {"Authorization": "Bearer $authToken"}));
     } on DioError catch (error) {
       debugPrint("Error when posting: ${error.response?.statusCode}");
     }
   }
 
-  Future<void> getToken() async {
+  //Pegar o token
+  Future<TokenModelEntity?> getToken() async {
     final response = await dio.post(
       'https://qa-api.tfes.tech/account/v1/auth/token',
       options: Options(
@@ -78,18 +115,19 @@ class CallApi{
 
     if (response.statusCode == 200) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      final token = response.data;
-      await prefs.setString('token', token.toString());
+      final TokenModelEntity token = TokenModelEntity.fromJson(response.data);
+      await prefs.setString('token', token.accessToken);
+      debugPrint("tokenModel : $token");
       return token;
     } else {
       debugPrint('Failed to get token: ${response.statusCode}');
     }
+    return null;
   }
-
 }
 
-class networkService extends InterceptorsWrapper{
-
+//Interceptors
+class networkService extends InterceptorsWrapper {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     debugPrint('REQUEST[${options.method}] => PATH: ${options.path}');
@@ -111,5 +149,4 @@ class networkService extends InterceptorsWrapper{
     );
     return super.onError(err, handler);
   }
-
 }

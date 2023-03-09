@@ -34,7 +34,7 @@ class _CustomInputTextFieldState extends State<CustomInputTextField> {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(
                 color: CustomColors.neutral700,
-                strokeAlign: StrokeAlign.outside)),
+                strokeAlign: BorderSide.strokeAlignOutside)),
         fillColor: CustomColors.neutral700,
         focusedErrorBorder: OutlineInputBorder(
           borderSide: BorderSide(color: CustomColors.redAlert)
@@ -43,12 +43,12 @@ class _CustomInputTextFieldState extends State<CustomInputTextField> {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(
                 color: CustomColors.neutral700,
-                strokeAlign: StrokeAlign.outside)),
+                strokeAlign: BorderSide.strokeAlignOutside)),
         enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(
                 color: CustomColors.neutral700,
-                strokeAlign: StrokeAlign.outside)),
+                strokeAlign: BorderSide.strokeAlignOutside)),
       ),
     );
   }
